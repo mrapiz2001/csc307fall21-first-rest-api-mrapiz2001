@@ -35,14 +35,17 @@ const port = 5000;
 
 app.use(express.json());
 
+// STEP 1 - print "Hello World"
 app.get('/', (req, res) => {
     res.send('Hello World!');
 });
 
+// make backend server listen to incoming http requests on defined port number
 app.listen(port, () => {
     console.log(`Example app listening at http://localhost:${port}`);
 });
 
+// STEP 4 - find user by name
 app.get('/users', (req, res) => {
     const name = req.query.name;
     if (name != undefined) {
@@ -59,6 +62,7 @@ const findUserByName = (name) => {
     return users['users_list'].filter((user) => user['name'] === name);
 }
 
+// STEP 5 - find user when given id
 app.get('/users/:id', (req, res) => {
     const id = req.params['id']; //or req.params.id
     let result = findUserById(id);
@@ -75,6 +79,7 @@ function findUserById(id) {
     //return users['users_list'].filter( (user) => user['id'] === id);
 }
 
+// STEP 6 - use POST to add members to list 
 app.post('/users', (req, res) => {
     const userToAdd = req.body;
     addUser(userToAdd);
@@ -83,4 +88,43 @@ app.post('/users', (req, res) => {
 
 function addUser(user) {
     users['users_list'].push(user);
+}
+
+// STEP 7a - hard delete operation to remove a particulat user by id from list
+app.delete('/users/:id', (req, res) => {
+    const id = req.params['id']; //or req.params.id
+    let result = findUserById(id);
+    if (result === undefined || result.length == 0)
+        res.status(404).send('Resource not found.');
+    else {
+        db.remove(id)
+            .then(removed => {
+                if (removed) {
+                    res.status(204).end();
+                } else { // 400 handles temporary errors
+                    res.status(404).json({ message: 'Resource not found.' }) 
+                }
+            })
+            .catch(err => { // handles bad request
+                res.status(500).json({ err })
+            })
+    }
+});
+
+// STEP 7b - get all users that match a given name and job
+app.get('/users/:name/:job', (req, res) => {
+    const name = req.params['name'];
+    const job = req.params['job'];
+    if (name != undefined && job != undefined) {
+        let result = findUserByNameAndJob(name, job);
+        result = { users_list: result };
+        res.send(result);
+    }
+    else {
+        res.send(users);
+    }
+});
+
+const findUserByNameAndJob = (name, job) => {
+    return users['users_list'].filter((user) => (user['name'] === name && user['job'] === job));
 }
