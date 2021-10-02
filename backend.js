@@ -87,11 +87,18 @@ function findUserById(id) {
 app.post('/users', (req, res) => {
     const userToAdd = req.body;
     addUser(userToAdd);
-    res.status(200).end();
+    res.status(201).end();  // linking part 6 - 201 = successful user insertion in list
 });
 
 function addUser(user) {
+    const id = randomIDGen().toString();  // turn random int to string
+    user['id'] = id;
     users['users_list'].push(user);
+}
+
+// linking part 6 - random ID generator
+function randomIDGen() {
+    return Math.floor(Math.random() * 1000);    // return random integer between 0 to 999
 }
 
 // STEP 7a - hard delete operation to remove a particulat user by id from list
