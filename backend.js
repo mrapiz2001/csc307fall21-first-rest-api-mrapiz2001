@@ -33,6 +33,10 @@ const express = require('express');
 const app = express();
 const port = 5000;
 
+// linking frontend and backend
+const cors = require('cors');
+app.use(cors());
+
 app.use(express.json());
 
 // STEP 1 - print "Hello World"
