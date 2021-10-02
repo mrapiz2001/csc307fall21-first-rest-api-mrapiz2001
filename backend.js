@@ -109,17 +109,16 @@ app.delete('/users/:id', (req, res) => {
     if (result === undefined || result.length == 0)
         res.status(404).send('Resource not found.');
     else {
-        db.remove(id)
-            .then(removed => {
-                if (removed) {
-                    res.status(204).end();
-                } else { // 400 handles temporary errors
-                    res.status(404).json({ message: 'Resource not found.' }) 
-                }
-            })
-            .catch(err => { // handles bad request
-                res.status(500).json({ err })
-            })
+        const old_index = users['users_list'].length;   // find length of original list
+        const new_list = users['users_list'].filter((user) => user['id'] != id);    // filter out users with specified id
+        const new_index = new_list.length;  // find length of new list if any have been removed
+
+        if (new_index < old_index) {  // users with specified id have been removed
+            users['users_list'] = new_list;
+            res.status(204);
+        } else {    // stayed the same
+            res.status(404).send('Resource not found.');
+        }
     }
 });
 
